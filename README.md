@@ -34,8 +34,8 @@ Note that if you don't map in the `public_html`, `archive` and
 is basically to run in simulator mode.
 
 The `passwd` volume map is needed for rsync; rsync requires the
-current user to have an entry in /etc/passwd. Use `getent passwd $USER
-> .passwd` if you want expose a more limited set of users to the
+current user to have an entry in /etc/passwd. Use `getent passwd
+$USER` if you want expose a more limited set of users to the
 container.
 
 Finally, the `mysqld.sock` volume mapping is needed when WeeWX is told
