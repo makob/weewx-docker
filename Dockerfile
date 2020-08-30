@@ -8,19 +8,16 @@ ARG INSTALL_PLUGINS="\
 https://github.com/matthewwall/weewx-mqtt/archive/master.zip,\
 https://github.com/makob/weewx-mqtt-input/releases/download/0.1/weewx-mqtt-input-0.1.tar.gz"
 
-# Entrypoint helper and userdir
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/home/weewx/bin/weewxd"]
 WORKDIR /home/weewx
-COPY entrypoint.sh /entrypoint.sh
-RUN mkdir /var/user; \
-    ln -s /home/weewx/.ssh /var/user/ssh; \
-    chmod 755 /entrypoint.sh
 
 # Install WeeWX dependencies
 # ephem requires gcc so we use a virtual apk environment for that
 RUN apk add --no-cache \
     	socat \
     	mysql-client \
+	openssh-client \
+	rsync \
 	python3 \
     	py3-configobj \
 	py3-cheetah \
@@ -41,12 +38,13 @@ RUN tar xvzf weewx-$WEEWX.tar.gz && \
     cd .. &&\
     rm -rf weewx-$WEEWX weewx-$WEEWX.tar.gz
 
-# Patch WeeWX logger to output to stdout
-RUN sed -i 's/handlers = syslog/handlers = console/g' /home/weewx/bin/weeutil/logger.py
-
-# Patch weewx.conf to use userdir for files that needs modifications
-RUN sed -i 's/HTML_ROOT = public_html/HTML_ROOT = \/var\/user\/public_html/g' /home/weewx/weewx.conf
-RUN sed -i 's/SQLITE_ROOT.*/SQLITE_ROOT = \/var\/user\/archive/g' /home/weewx/weewx.conf
+# Patch WeeWX logger to output to stdout and make sure non-root has
+# access the default outputs
+RUN sed -i 's/handlers = syslog/handlers = console/g' /home/weewx/bin/weeutil/logger.py &&\
+    mkdir /home/weewx/archive /home/weewx/public_html &&\
+    chmod 777 /home/weewx/archive /home/weewx/public_html &&\
+    touch /home/weewx/weewx.conf &&\
+    chmod 666 /home/weewx/weewx.conf
 
 # Install plugins
 RUN if [ ! -z "${INSTALL_PLUGINS}" ]; then \
