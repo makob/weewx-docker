@@ -6,7 +6,7 @@ ARG WEEWX=4.1.1
 # Comma-separated list of plugins (URLs) to install
 ARG INSTALL_PLUGINS="\
 https://github.com/matthewwall/weewx-mqtt/archive/master.zip,\
-https://github.com/makob/weewx-mqtt-input/releases/download/0.1/weewx-mqtt-input-0.1.tar.gz"
+https://github.com/makob/weewx-mqtt-input/releases/download/0.2/weewx-mqtt-input-0.2.tar.gz"
 
 ENTRYPOINT ["/home/weewx/bin/weewxd"]
 WORKDIR /home/weewx
@@ -14,7 +14,6 @@ WORKDIR /home/weewx
 # Install WeeWX dependencies
 # ephem requires gcc so we use a virtual apk environment for that
 RUN apk add --no-cache \
-    	socat \
     	mysql-client \
 	openssh-client \
 	rsync \
