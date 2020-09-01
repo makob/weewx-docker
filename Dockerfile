@@ -8,7 +8,7 @@ ARG INSTALL_PLUGINS="\
 https://github.com/matthewwall/weewx-mqtt/archive/master.zip,\
 https://github.com/makob/weewx-mqtt-input/releases/download/0.2/weewx-mqtt-input-0.2.tar.gz"
 
-ENTRYPOINT ["/home/weewx/bin/weewxd"]
+ENTRYPOINT ["/home/weewx/bin/weewxd", "-x"]
 WORKDIR /home/weewx
 
 # Install WeeWX dependencies
