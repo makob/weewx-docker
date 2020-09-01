@@ -12,7 +12,7 @@ ExecStart=/usr/bin/docker run --name=%n --rm --net=host \
   -v /home/%u/archive:/home/weewx/archive \
   -v /home/%u/public_html:/home/weewx/public_html \
   -v /home/%u/weewx.conf:/home/weewx/weewx.conf \
-  weewx4
+  makobdk/weewx4:latest
 ExecStop=/usr/bin/docker stop %n ; /usr/bin/docker rm -f %n
 Type=simple
 Restart=on-failure

@@ -6,7 +6,7 @@ ARG WEEWX=4.1.1
 # Comma-separated list of plugins (URLs) to install
 ARG INSTALL_PLUGINS="\
 https://github.com/matthewwall/weewx-mqtt/archive/master.zip,\
-https://github.com/makob/weewx-mqtt-input/releases/download/0.2/weewx-mqtt-input-0.2.tar.gz"
+https://github.com/makob/weewx-mqtt-input/releases/download/0.3/weewx-mqtt-input-0.3.zip"
 
 ENTRYPOINT ["/home/weewx/bin/weewxd", "-x"]
 WORKDIR /home/weewx

@@ -24,7 +24,7 @@ Please run this as a non-root user. For example
   -v /home/user/archive:/home/weewx/archive \
   -v /home/user/public_html:/home/weewx/public_html \
   -v /home/user/weewx.conf:/home/weewx/weewx.conf \
-  weewx4
+  makobdk/weewx4:latest
 ```
 
 Replace the `1000:1000` and `user` with the appropriate username/ids
