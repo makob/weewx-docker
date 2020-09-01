@@ -2,7 +2,7 @@
 Description=WeeWX4 weather station
 
 [Service]
-ExecStart=/usr/bin/docker run --rm --name=%n --net=host \
+ExecStart=/usr/bin/docker run --name=%n --rm --net=host \
   -u %U:%G \
   -v /etc/localtime:/etc/localtime:ro \
   -v /etc/timezone:/etc/timezone:ro \
@@ -13,10 +13,9 @@ ExecStart=/usr/bin/docker run --rm --name=%n --net=host \
   -v /home/%u/public_html:/home/weewx/public_html \
   -v /home/%u/weewx.conf:/home/weewx/weewx.conf \
   weewx4
-ExecStop=/usr/bin/docker stop -t 2 %n ; /usr/bin/docker rm -f %n
+ExecStop=/usr/bin/docker stop %n ; /usr/bin/docker rm -f %n
 Type=simple
-Restart=always
-RestartSec=15s
+Restart=on-failure
 
 [Install]
 WantedBy=default.target

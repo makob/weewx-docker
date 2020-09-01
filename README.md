@@ -1,6 +1,14 @@
 # weewx-docker
 A Dockerfile for the WeeWX weather station.
 
+## Installing the image
+
+You can get this directly from Docker Hub with
+
+```
+docker pull makobdk/weewx4:latest
+```
+
 ## Running the image
 
 Please run this as a non-root user. For example
@@ -47,7 +55,7 @@ as 'use a unix socket'.
 Because I'm lazy, the provided Makefile can help you build the image:
 
 ```
-make
+make build
 ```
 
 Use the `--build-arg INSTALL_PLUGINS="<urls>"` to specify a
@@ -62,3 +70,6 @@ following plugins:
 
 Note that the Dockerfile patches WeeWX to output log messages to the
 console.
+
+There's also a `make push` target for pushing the image to Docker Hub,
+although that will only work if you have access to my repository.
