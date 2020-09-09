@@ -1,19 +1,12 @@
 [Unit]
-Description=WeeWX4 weather station
+Description=WeeWX4 weather station via docker-compose
 
 [Service]
-ExecStart=/usr/bin/docker run --name=%n --rm --net=host \
-  -u %U:%G \
-  -v /etc/localtime:/etc/localtime:ro \
-  -v /etc/timezone:/etc/timezone:ro \
-  -v /etc/passwd:/etc/passwd:ro \
-  -v /run/mysqld/mysqld.sock:/run/mysqld/mysqld.sock \
-  -v /home/%u/.ssh:/home/weewx/.ssh \
-  -v /home/%u/archive:/home/weewx/archive \
-  -v /home/%u/public_html:/home/weewx/public_html \
-  -v /home/%u/weewx.conf:/home/weewx/weewx.conf \
-  makobdk/weewx4:latest
-ExecStop=/usr/bin/docker stop %n ; /usr/bin/docker rm -f %n
+Environment=UID=%U
+Environment=GID=%G
+Environment=USER=%u
+ExecStart=docker-compose -f /home/%u/weewx/docker-compose.yml up
+ExecStop=docker-compose -f /home/%u/weewx/docker-compose.yml stop ; docker-compose -f /home/%u/weewx/docker-compose.yml rm -f
 Type=simple
 Restart=on-failure
 

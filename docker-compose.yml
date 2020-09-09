@@ -1,0 +1,16 @@
+version: '3'
+services:
+  weewx4:
+    build: .
+    image: makobdk/weewx4:latest
+    container_name: 'weewx4'
+    user: "${UID}:${GID}"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /home/${USER}/weewx/passwd:/etc/passwd:ro
+      - /home/${USER}/weewx/group:/etc/group:ro
+      - /home/${USER}/weewx/archive:/home/weewx/archive
+      - /home/${USER}/weewx/weewx.conf:/home/weewx/weewx.conf
+      - /home/${USER}/.public_html:/home/weewx/public_html
+      - /home/${USER}/.ssh:/home/weewx/.ssh
