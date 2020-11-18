@@ -1,7 +1,7 @@
 FROM alpine:latest
 
 # Set WeeWX version to install (see http://weewx.com/downloads/)
-ARG WEEWX=4.1.1
+ARG WEEWX=4.2.0
 
 # Comma-separated list of plugins (URLs) to install
 ARG INSTALL_PLUGINS="\
@@ -14,11 +14,11 @@ WORKDIR /home/weewx
 # Install WeeWX dependencies
 # ephem requires gcc so we use a virtual apk environment for that
 RUN apk add --no-cache \
-    	mysql-client \
+	mysql-client \
 	openssh-client \
 	rsync \
 	python3 \
-    	py3-configobj \
+	py3-configobj \
 	py3-cheetah \
 	py3-pip \
 	py3-mysqlclient \
