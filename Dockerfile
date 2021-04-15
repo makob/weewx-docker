@@ -29,7 +29,7 @@ RUN apk add --no-cache \
     apk del .build-deps
 
 # Install WeeWX
-ADD http://weewx.com/downloads/weewx-$WEEWX.tar.gz .
+ADD http://weewx.com/downloads/released_versions/weewx-$WEEWX.tar.gz .
 RUN tar xvzf weewx-$WEEWX.tar.gz && \
     cd weewx-$WEEWX && \
     python3 ./setup.py build &&\
