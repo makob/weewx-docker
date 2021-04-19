@@ -45,6 +45,10 @@ RUN sed -i 's/handlers = syslog/handlers = console/g' /home/weewx/bin/weeutil/lo
     touch /home/weewx/weewx.conf &&\
     chmod 666 /home/weewx/weewx.conf
 
+# Install alarm/lowBattery scripts
+# Will require configuration in order to run; this only makes them available
+RUN cp examples/alarm.py examples/lowBattery.py bin/user/
+
 # Install plugins
 RUN if [ ! -z "${INSTALL_PLUGINS}" ]; then \
       OLDIFS=$IFS; \
