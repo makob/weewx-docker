@@ -1,7 +1,7 @@
 FROM alpine:latest
 
 # Set WeeWX version to install (see http://weewx.com/downloads/)
-ARG WEEWX=4.4.0
+ARG WEEWX=4.5.1
 
 # Comma-separated list of plugins (URLs) to install
 ARG INSTALL_PLUGINS="\
@@ -21,6 +21,7 @@ RUN apk add --no-cache \
 	py3-configobj \
 	py3-cheetah \
 	py3-pip \
+	py3-wheel \
 	py3-mysqlclient \
 	py3-pillow \
 	py3-paho-mqtt &&\
