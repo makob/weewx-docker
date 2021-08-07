@@ -30,7 +30,7 @@ RUN apk add --no-cache \
     apk del .build-deps
 
 # Install WeeWX
-ADD http://weewx.com/downloads/weewx-$WEEWX.tar.gz .
+ADD http://weewx.com/downloads/released_versions/weewx-$WEEWX.tar.gz .
 RUN tar xvzf weewx-$WEEWX.tar.gz && \
     cd weewx-$WEEWX && \
     python3 ./setup.py build &&\
@@ -45,6 +45,10 @@ RUN sed -i 's/handlers = syslog/handlers = console/g' /home/weewx/bin/weeutil/lo
     chmod 777 /home/weewx/archive /home/weewx/public_html &&\
     touch /home/weewx/weewx.conf &&\
     chmod 666 /home/weewx/weewx.conf
+
+# Install alarm/lowBattery scripts
+# Will require configuration in order to run; this only makes them available
+RUN cp examples/alarm.py examples/lowBattery.py bin/user/
 
 # Install plugins
 RUN if [ ! -z "${INSTALL_PLUGINS}" ]; then \
