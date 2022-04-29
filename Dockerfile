@@ -1,7 +1,7 @@
 FROM alpine:latest
 
 # Set WeeWX version to install (see http://weewx.com/downloads/)
-ARG WEEWX=4.6.2
+ARG WEEWX=4.8.0
 
 # Comma-separated list of plugins (URLs) to install
 ARG INSTALL_PLUGINS="\
