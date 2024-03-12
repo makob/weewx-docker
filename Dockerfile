@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.17
 
 # Set WeeWX version to install (see http://weewx.com/downloads/)
 ARG WEEWX=4.10.2
@@ -8,7 +8,6 @@ ARG INSTALL_PLUGINS="\
 https://github.com/matthewwall/weewx-mqtt/archive/master.zip,\
 https://github.com/makob/weewx-mqtt-input/releases/download/0.5/weewx-mqtt-input-0.5.zip"
 
-ENTRYPOINT ["/home/weewx/bin/weewxd", "-x"]
 WORKDIR /home/weewx
 
 # Install WeeWX dependencies
@@ -38,6 +37,8 @@ RUN tar xvzf weewx-$WEEWX.tar.gz && \
     cd .. &&\
     rm -rf weewx-$WEEWX weewx-$WEEWX.tar.gz
 
+ENTRYPOINT ["/home/weewx/bin/weewxd", "-x"]
+
 # Patch WeeWX logger to output to stdout and make sure non-root has
 # access the default outputs
 RUN sed -i 's/handlers = syslog/handlers = console/g' /home/weewx/bin/weeutil/logger.py &&\
@@ -62,3 +63,8 @@ RUN if [ ! -z "${INSTALL_PLUGINS}" ]; then \
       done; \
     fi; \
     rm -f /home/weewx/weewx.conf.*
+
+# Locally sourced plugins, for development. Copy zip files into "plugins-from-local". Files remain in image.
+RUN mkdir plugins-from-local
+# COPY weewx-mqtt-input-0.2.zip plugins-from-local/
+RUN find plugins-from-local -name '*.zip' -print0 | xargs -0 -r -n 1 /home/weewx/bin/wee_extension --install
