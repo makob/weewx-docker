@@ -1,4 +1,4 @@
-FROM alpine:3.17
+FROM alpine:3.19
 
 # Comma-separated list of plugins (URLs) to install
 ARG INSTALL_PLUGINS="\
@@ -11,23 +11,21 @@ WORKDIR /home/weewx
 
 # Install WeeWX and dependencies
 # ephem requires gcc so we use a virtual apk environment for that
+# We deliberately force pip to install stuff (--break-system-packages)
 RUN apk add --no-cache \
         rsyslog \
 	mysql-client \
 	openssh-client \
 	rsync \
 	python3 \
-	py3-configobj \
-	py3-cheetah \
 	py3-pip \
 	py3-wheel \
 	py3-mysqlclient \
-	py3-pillow \
 	py3-paho-mqtt &&\
     apk add --no-cache --virtual .build-deps build-base python3-dev &&\
-    pip3 install ephem &&\
+    pip3 install --break-system-packages ephem &&\
     apk del .build-deps &&\
-    pip3 install weewx
+    pip3 install --break-system-packages weewx
 
 ENTRYPOINT ["/home/weewx/bin/weewxd", "-x"]
 
