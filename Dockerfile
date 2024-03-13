@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.17
 
 # Comma-separated list of plugins (URLs) to install
 ARG INSTALL_PLUGINS="\
@@ -7,7 +7,6 @@ https://github.com/makob/weewx-mqtt-input/releases/download/0.6/weewx-mqtt-input
 # TODO: It looks like this plugin isn't quite ready for weewx5 ?
 # https://github.com/matthewwall/weewx-mqtt/archive/master.zip,\
 
-ENTRYPOINT ["/home/weewx/bin/weewxd", "-x"]
 WORKDIR /home/weewx
 
 # Install WeeWX and dependencies
@@ -30,13 +29,15 @@ RUN apk add --no-cache \
     apk del .build-deps &&\
     pip3 install weewx
 
+ENTRYPOINT ["/home/weewx/bin/weewxd", "-x"]
+
 # Container-friendly rsyslog config to output to stdout/stderr
 COPY rsyslog.conf /etc/rsyslog.conf
 
 # Copy default config file to /home/weewx/weewx.conf
 RUN find /usr/lib -name weewx.conf ! -path \*/util/\* -exec cp {} . \;
 
-# Make sure non-root has access the default outputs
+# Make sure all users have access the default outputs
 RUN mkdir /home/weewx/archive /home/weewx/public_html &&\
     chmod 777 /home/weewx/archive /home/weewx/public_html &&\
     touch /home/weewx/weewx.conf &&\
@@ -54,3 +55,8 @@ RUN syslogd & \
       IFS=$OLDIFS; \
     fi; \
     rm -f /home/weewx/weewx.conf.*
+
+# Locally sourced plugins, for development. Copy zip files into "plugins-from-local". Files remain in image.
+RUN mkdir plugins-from-local
+# COPY weewx-mqtt-input-0.2.zip plugins-from-local/
+RUN find plugins-from-local -name '*.zip' -print0 | xargs -0 -r -n 1 weectl extension install --yes
