@@ -6,7 +6,7 @@ A Dockerfile for the WeeWX weather station.
 You can get this directly from Docker Hub with
 
 ```
-docker pull makobdk/weewx4:latest
+docker pull makobdk/weewx5:latest
 ```
 
 ## Running the image
@@ -20,7 +20,7 @@ UID=`id -u' GID=`id -g` USER=`whoami` docker-compose up
 Set the UID, GID and USER variables to whatever is appropriate for
 your system.
 
-You can use the `weewx4.service` file as a systemd user unit file.
+You can use the `weewx5.service` file as a systemd user unit file.
 Please check that the paths are correct.
 
 Do have a look at the `docker-compose.yml` file to see what volumes

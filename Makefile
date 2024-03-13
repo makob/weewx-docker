@@ -1,12 +1,11 @@
-VERSION:=$(shell cat Dockerfile|grep -Po '(?<=ARG WEEWX=).*')
-EXTRA_VERSION=-1
+VERSION:=$(shell cat VERSION)
 
 .PHONY: build
 build:
-	docker build --tag makobdk/weewx4:$(VERSION)$(EXTRA_VERSION) --tag makobdk/weewx4:latest .
+	docker build --tag makobdk/weewx5:$(VERSION) --tag makobdk/weewx5:latest .
 
 .PHONY: push
 push:
 	docker login
-	docker push makobdk/weewx4:$(VERSION)$(EXTRA_VERSION)
-	docker push makobdk/weewx4:latest
+	docker push makobdk/weewx5:$(VERSION)
+	docker push makobdk/weewx5:latest

@@ -1,9 +1,9 @@
 version: '3'
 services:
-  weewx4:
+  weewx5:
     build: .
-    image: makobdk/weewx4:latest
-    container_name: 'weewx4'
+    image: makobdk/weewx5:latest
+    container_name: weewx5
     user: "${UID}:${GID}"
     volumes:
       - /etc/localtime:/etc/localtime:ro

@@ -1,19 +1,19 @@
 FROM alpine:latest
 
-# Set WeeWX version to install (see http://weewx.com/downloads/)
-ARG WEEWX=4.10.2
-
 # Comma-separated list of plugins (URLs) to install
 ARG INSTALL_PLUGINS="\
-https://github.com/matthewwall/weewx-mqtt/archive/master.zip,\
-https://github.com/makob/weewx-mqtt-input/releases/download/0.5/weewx-mqtt-input-0.5.zip"
+https://github.com/makob/weewx-mqtt-input/releases/download/0.6/weewx-mqtt-input-0.6.zip"
+
+# TODO: It looks like this plugin isn't quite ready for weewx5 ?
+# https://github.com/matthewwall/weewx-mqtt/archive/master.zip,\
 
 ENTRYPOINT ["/home/weewx/bin/weewxd", "-x"]
 WORKDIR /home/weewx
 
-# Install WeeWX dependencies
+# Install WeeWX and dependencies
 # ephem requires gcc so we use a virtual apk environment for that
 RUN apk add --no-cache \
+        rsyslog \
 	mysql-client \
 	openssh-client \
 	rsync \
@@ -27,38 +27,30 @@ RUN apk add --no-cache \
 	py3-paho-mqtt &&\
     apk add --no-cache --virtual .build-deps build-base python3-dev &&\
     pip3 install ephem &&\
-    apk del .build-deps
+    apk del .build-deps &&\
+    pip3 install weewx
 
-# Install WeeWX
-ADD http://weewx.com/downloads/released_versions/weewx-$WEEWX.tar.gz .
-RUN tar xvzf weewx-$WEEWX.tar.gz && \
-    cd weewx-$WEEWX && \
-    python3 ./setup.py build &&\
-    python3 ./setup.py install --no-prompt &&\
-    cd .. &&\
-    rm -rf weewx-$WEEWX weewx-$WEEWX.tar.gz
+# Container-friendly rsyslog config to output to stdout/stderr
+COPY rsyslog.conf /etc/rsyslog.conf
 
-# Patch WeeWX logger to output to stdout and make sure non-root has
-# access the default outputs
-RUN sed -i 's/handlers = syslog/handlers = console/g' /home/weewx/bin/weeutil/logger.py &&\
-    mkdir /home/weewx/archive /home/weewx/public_html &&\
+# Copy default config file to /home/weewx/weewx.conf
+RUN find /usr/lib -name weewx.conf ! -path \*/util/\* -exec cp {} . \;
+
+# Make sure non-root has access the default outputs
+RUN mkdir /home/weewx/archive /home/weewx/public_html &&\
     chmod 777 /home/weewx/archive /home/weewx/public_html &&\
     touch /home/weewx/weewx.conf &&\
     chmod 666 /home/weewx/weewx.conf
 
-# Install alarm/lowBattery scripts
-# Will require configuration in order to run; this only makes them available
-RUN cp examples/alarm.py examples/lowBattery.py bin/user/
-
-# Install plugins
-RUN if [ ! -z "${INSTALL_PLUGINS}" ]; then \
+# Install plugins. weectl (python logger) requires syslog.
+# Remove backup config files afterwards.
+RUN syslogd & \
+    if [ ! -z "${INSTALL_PLUGINS}" ]; then \
       OLDIFS=$IFS; \
       IFS=','; \
       for PLUGIN in ${INSTALL_PLUGINS}; do \
-        IFS=$OLDIFS; \
-	wget $PLUGIN &&\
-	bin/wee_extension --install `basename $PLUGIN` ; \
-	rm -f `basename $PLUGIN`; \
+        weectl extension install --yes $PLUGIN ; \
       done; \
+      IFS=$OLDIFS; \
     fi; \
     rm -f /home/weewx/weewx.conf.*
