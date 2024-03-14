@@ -1,10 +1,7 @@
 [Unit]
-Description=WeeWX4 weather station via docker-compose
+Description=WeeWX weather station via docker-compose
 
 [Service]
-Environment=UID=%U
-Environment=GID=%G
-Environment=USER=%u
 ExecStart=docker-compose -f /home/%u/weewx/docker-compose.yml up
 ExecStop=docker-compose -f /home/%u/weewx/docker-compose.yml stop ; docker-compose -f /home/%u/weewx/docker-compose.yml rm -f
 Type=simple

@@ -2,7 +2,7 @@ FROM alpine:3.19
 
 # Comma-separated list of plugins (URLs) to install
 ARG INSTALL_PLUGINS="\
-https://github.com/makob/weewx-mqtt-input/releases/download/0.6/weewx-mqtt-input-0.6.zip,\
+https://github.com/makob/weewx-mqtt-input/releases/download/1.0/weewx-mqtt-input-1.0.zip,\
 https://github.com/matthewwall/weewx-mqtt/archive/master.zip"
 
 WORKDIR /home/weewx

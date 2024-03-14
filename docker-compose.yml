@@ -14,7 +14,7 @@ services:
       - /home/${USER}/weewx/group:/etc/group:ro
       - /home/${USER}/weewx/archive:/home/weewx/archive
       - /home/${USER}/weewx/weewx.conf:/home/weewx/weewx.conf
-      - /home/${USER}/.public_html:/home/weewx/public_html
+      - /home/${USER}/weewx/html:/home/weewx/public_html
       - /home/${USER}/.ssh:/home/weewx/.ssh
       - /home/${USER}/.ssh:/root/.ssh
 
