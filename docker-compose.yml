@@ -4,6 +4,7 @@ services:
     build: .
     image: makobdk/weewx5:latest
     container_name: weewx
+    restart: on-failure
     environment:
       WEEWX_USER: ${USER}
     volumes:
@@ -15,3 +16,18 @@ services:
       - /home/${USER}/weewx/weewx.conf:/home/weewx/weewx.conf
       - /home/${USER}/.public_html:/home/weewx/public_html
       - /home/${USER}/.ssh:/home/weewx/.ssh
+      - /home/${USER}/.ssh:/root/.ssh
+
+#
+# Example for exposing public_html via nginx
+#
+#  weewx_nginx:
+#    image: nginx
+#    container_name: weewx_nginx
+#    restart: on-failure
+#    volumes:
+#      - /home/${USER}/weewx/html:/usr/share/nginx/html
+#      - /home/${USER}/weewx/nginx-conf.d:/etc/nginx/conf.d
+#      - /root/ssl-self-sign:/etc/nginx/certs
+#    ports:
+#      - "8084:443"
