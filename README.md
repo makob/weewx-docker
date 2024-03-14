@@ -14,13 +14,10 @@ docker pull makobdk/weewx5:latest
 Please run this via docker-compose:
 
 ```
-UID=`id -u' GID=`id -g` USER=`whoami` docker-compose up
+docker-compose up
 ```
 
-Set the UID, GID and USER variables to whatever is appropriate for
-your system.
-
-You can use the `weewx5.service` file as a systemd user unit file.
+You can use the `weewx5.service` file as a systemd (user) unit file.
 Please check that the paths are correct.
 
 Do have a look at the `docker-compose.yml` file to see what volumes
@@ -39,7 +36,9 @@ The `passwd` volume map is needed for rsync; rsync requires the
 current user to have an entry in /etc/passwd. Redirect
 `getent passwd $USER`
 to a file and mount that if you want to expose a more limited set of
-users to the container.
+users to the container. You probably also want to set the
+`WEEWX_USER` environment variable to run the weewx daemon as that user
+within the container - otherwise rsync probably won't work.
 
 ## Building the image
 

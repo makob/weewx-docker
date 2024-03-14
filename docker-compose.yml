@@ -1,10 +1,11 @@
 version: '3'
 services:
-  weewx5:
+  weewx:
     build: .
     image: makobdk/weewx5:latest
-    container_name: weewx5
-    user: "${UID}:${GID}"
+    container_name: weewx
+    environment:
+      WEEWX_USER: ${USER}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
