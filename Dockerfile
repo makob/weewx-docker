@@ -1,70 +1,60 @@
-FROM alpine:3.17
-
-# Set WeeWX version to install (see http://weewx.com/downloads/)
-ARG WEEWX=4.10.2
+FROM alpine:3.19
 
 # Comma-separated list of plugins (URLs) to install
 ARG INSTALL_PLUGINS="\
-https://github.com/matthewwall/weewx-mqtt/archive/master.zip,\
-https://github.com/makob/weewx-mqtt-input/releases/download/0.5/weewx-mqtt-input-0.5.zip"
+https://github.com/makob/weewx-mqtt-input/releases/download/1.0/weewx-mqtt-input-1.0.zip,\
+https://github.com/matthewwall/weewx-mqtt/archive/master.zip"
 
 WORKDIR /home/weewx
 
-# Install WeeWX dependencies
+# Container-friendly rsyslog config to output to stdout/stderr
+COPY rsyslog.conf /etc/rsyslog.conf
+
+# Install WeeWX and dependencies
 # ephem requires gcc so we use a virtual apk environment for that
 RUN apk add --no-cache \
+        rsyslog \
 	mysql-client \
 	openssh-client \
 	rsync \
 	python3 \
-	py3-configobj \
-	py3-cheetah \
 	py3-pip \
 	py3-wheel \
-	py3-mysqlclient \
-	py3-pillow \
-	py3-paho-mqtt &&\
-    apk add --no-cache --virtual .build-deps build-base python3-dev &&\
-    pip3 install ephem &&\
+	py3-paho-mqtt \
+	py3-pymysql && \
+    apk add --no-cache --virtual .build-deps build-base python3-dev && \
+    pip install --break-system-packages ephem && \
+    pip install --break-system-packages weewx && \
     apk del .build-deps
 
-# Install WeeWX
-ADD http://weewx.com/downloads/released_versions/weewx-$WEEWX.tar.gz .
-RUN tar xvzf weewx-$WEEWX.tar.gz && \
-    cd weewx-$WEEWX && \
-    python3 ./setup.py build &&\
-    python3 ./setup.py install --no-prompt &&\
-    cd .. &&\
-    rm -rf weewx-$WEEWX weewx-$WEEWX.tar.gz
+# Copy simple entrypoint and set it
+COPY entry.sh /home/weewx/entry.sh
+ENTRYPOINT ["/home/weewx/entry.sh"]
 
-ENTRYPOINT ["/home/weewx/bin/weewxd", "-x"]
+# Make sure all users have access the default outputs
+RUN mkdir /home/weewx/archive /home/weewx/public_html &&\
+    chmod 777 /home/weewx/archive /home/weewx/public_html
 
-# Patch WeeWX logger to output to stdout and make sure non-root has
-# access the default outputs
-RUN sed -i 's/handlers = syslog/handlers = console/g' /home/weewx/bin/weeutil/logger.py &&\
-    mkdir /home/weewx/archive /home/weewx/public_html &&\
-    chmod 777 /home/weewx/archive /home/weewx/public_html &&\
-    touch /home/weewx/weewx.conf &&\
-    chmod 666 /home/weewx/weewx.conf
+# Setup symlink to weewx_data and prep default config
+RUN WD=$(find /usr/lib -name weewx_data) && \
+    ln -s ${WD} weewx_data && \
+    echo "WEEWX_ROOT=/home/weewx/weewx_data" > weewx.conf && \
+    cat weewx_data/weewx.conf >> weewx.conf && \
+    chmod 666 weewx.conf
 
-# Install alarm/lowBattery scripts
-# Will require configuration in order to run; this only makes them available
-RUN cp examples/alarm.py examples/lowBattery.py bin/user/
-
-# Install plugins
-RUN if [ ! -z "${INSTALL_PLUGINS}" ]; then \
+# Install plugins. weectl (python logger) requires syslog.
+# Remove backup config files afterwards.
+RUN syslogd & \
+    if [ ! -z "${INSTALL_PLUGINS}" ]; then \
       OLDIFS=$IFS; \
       IFS=','; \
       for PLUGIN in ${INSTALL_PLUGINS}; do \
-        IFS=$OLDIFS; \
-	wget $PLUGIN &&\
-	bin/wee_extension --install `basename $PLUGIN` ; \
-	rm -f `basename $PLUGIN`; \
+        weectl extension install --yes $PLUGIN ; \
       done; \
+      IFS=$OLDIFS; \
     fi; \
     rm -f /home/weewx/weewx.conf.*
 
 # Locally sourced plugins, for development. Copy zip files into "plugins-from-local". Files remain in image.
-RUN mkdir plugins-from-local
-# COPY weewx-mqtt-input-0.2.zip plugins-from-local/
-RUN find plugins-from-local -name '*.zip' -print0 | xargs -0 -r -n 1 /home/weewx/bin/wee_extension --install
+RUN mkdir plugins-from-local && \
+    find plugins-from-local -name '*.zip' -print0 | xargs -0 -r -n 1 weectl extension install --yes

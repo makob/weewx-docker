@@ -1,10 +1,12 @@
 version: '3'
 services:
-  weewx4:
+  weewx:
     build: .
-    image: makobdk/weewx4:latest
-    container_name: 'weewx4'
-    user: "${UID}:${GID}"
+    image: makobdk/weewx5:latest
+    container_name: weewx
+    restart: on-failure
+    environment:
+      WEEWX_USER: ${USER}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
@@ -12,5 +14,20 @@ services:
       - /home/${USER}/weewx/group:/etc/group:ro
       - /home/${USER}/weewx/archive:/home/weewx/archive
       - /home/${USER}/weewx/weewx.conf:/home/weewx/weewx.conf
-      - /home/${USER}/.public_html:/home/weewx/public_html
+      - /home/${USER}/weewx/html:/home/weewx/public_html
       - /home/${USER}/.ssh:/home/weewx/.ssh
+      - /home/${USER}/.ssh:/root/.ssh
+
+#
+# Example for exposing public_html via nginx
+#
+#  weewx_nginx:
+#    image: nginx
+#    container_name: weewx_nginx
+#    restart: on-failure
+#    volumes:
+#      - /home/${USER}/weewx/html:/usr/share/nginx/html
+#      - /home/${USER}/weewx/nginx-conf.d:/etc/nginx/conf.d
+#      - /root/ssl-self-sign:/etc/nginx/certs
+#    ports:
+#      - "8084:443"
