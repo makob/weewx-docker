@@ -1,4 +1,3 @@
-version: '3'
 services:
   weewx:
     build: .
@@ -12,10 +11,9 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /home/${USER}/weewx/passwd:/etc/passwd:ro
       - /home/${USER}/weewx/group:/etc/group:ro
-      - /home/${USER}/weewx/archive:/home/weewx/archive
-      - /home/${USER}/weewx/weewx.conf:/home/weewx/weewx.conf
-      - /home/${USER}/weewx/html:/home/weewx/public_html
-      - /home/${USER}/.ssh:/home/weewx/.ssh
+      - /home/${USER}/weewx/archive:/root/archive
+      - /home/${USER}/weewx/weewx.conf:/root/weewx-data/weewx.conf
+      - /home/${USER}/weewx/html:/root/public_html
       - /home/${USER}/.ssh:/root/.ssh
 
 #

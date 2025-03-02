@@ -1,50 +1,56 @@
-FROM alpine:3.19
+FROM alpine:3.21
 
 # Comma-separated list of plugins (URLs) to install
 ARG INSTALL_PLUGINS="\
 https://github.com/makob/weewx-mqtt-input/releases/download/1.0/weewx-mqtt-input-1.0.zip,\
 https://github.com/matthewwall/weewx-mqtt/archive/master.zip"
 
-WORKDIR /home/weewx
+WORKDIR /root
 
 # Container-friendly rsyslog config to output to stdout/stderr
 COPY rsyslog.conf /etc/rsyslog.conf
 
+# Initial dependencies
+RUN apk add --no-cache \
+    python3 \
+    rsyslog \
+    mysql-client \
+    openssh-client \
+    rsync \
+    py3-mysqlclient
+
+# Python virtual environment
+RUN python -m venv /root/pyvenv && \
+    source /root/pyvenv/bin/activate && \
+    pip install --upgrade pip
+
 # Install WeeWX and dependencies
 # ephem requires gcc so we use a virtual apk environment for that
-RUN apk add --no-cache \
-        rsyslog \
-	mysql-client \
-	openssh-client \
-	rsync \
-	python3 \
-	py3-pip \
-	py3-wheel \
-	py3-paho-mqtt \
-	py3-pymysql && \
+RUN . /root/pyvenv/bin/activate && \
     apk add --no-cache --virtual .build-deps build-base python3-dev && \
-    pip install --break-system-packages ephem && \
-    pip install --break-system-packages weewx && \
+    pip install wheel && \
+    pip install paho-mqtt && \
+    pip install ephem && \
+    pip install weewx && \
     apk del .build-deps
 
 # Copy simple entrypoint and set it
-COPY entry.sh /home/weewx/entry.sh
-ENTRYPOINT ["/home/weewx/entry.sh"]
+COPY entry.sh /root/entry.sh
+ENTRYPOINT ["/root/entry.sh"]
 
 # Make sure all users have access the default outputs
-RUN mkdir /home/weewx/archive /home/weewx/public_html &&\
-    chmod 777 /home/weewx/archive /home/weewx/public_html
+RUN mkdir /root/archive /root/public_html &&\
+    chmod 777 /root/archive /root/public_html
 
 # Setup symlink to weewx_data and prep default config
-RUN WD=$(find /usr/lib -name weewx_data) && \
-    ln -s ${WD} weewx_data && \
-    echo "WEEWX_ROOT=/home/weewx/weewx_data" > weewx.conf && \
-    cat weewx_data/weewx.conf >> weewx.conf && \
-    chmod 666 weewx.conf
+RUN syslogd & \
+    . /root/pyvenv/bin/activate && \
+    weectl station create --no-prompt --html-root=/root/public_html
 
 # Install plugins. weectl (python logger) requires syslog.
 # Remove backup config files afterwards.
 RUN syslogd & \
+    . /root/pyvenv/bin/activate && \
     if [ ! -z "${INSTALL_PLUGINS}" ]; then \
       OLDIFS=$IFS; \
       IFS=','; \
@@ -53,8 +59,9 @@ RUN syslogd & \
       done; \
       IFS=$OLDIFS; \
     fi; \
-    rm -f /home/weewx/weewx.conf.*
+    rm -f /root/weewx.conf.*
 
 # Locally sourced plugins, for development. Copy zip files into "plugins-from-local". Files remain in image.
-RUN mkdir plugins-from-local && \
+RUN . /root/pyvenv/bin/activate && \
+    mkdir plugins-from-local && \
     find plugins-from-local -name '*.zip' -print0 | xargs -0 -r -n 1 weectl extension install --yes

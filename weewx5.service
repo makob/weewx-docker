@@ -2,8 +2,8 @@
 Description=WeeWX weather station via docker-compose
 
 [Service]
-ExecStart=docker-compose -f /home/%u/weewx/docker-compose.yml up
-ExecStop=docker-compose -f /home/%u/weewx/docker-compose.yml stop ; docker-compose -f /home/%u/weewx/docker-compose.yml rm -f
+ExecStart=docker compose -f /home/%u/weewx/docker-compose.yml up
+ExecStop=docker compose -f /home/%u/weewx/docker-compose.yml stop ; docker compose -f /home/%u/weewx/docker-compose.yml rm -f
 Type=simple
 Restart=on-failure
 
