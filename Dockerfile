@@ -21,7 +21,7 @@ RUN apk add --no-cache \
 
 # Python virtual environment
 RUN python -m venv /root/pyvenv && \
-    source /root/pyvenv/bin/activate && \
+    . /root/pyvenv/bin/activate && \
     pip install --upgrade pip
 
 # Install WeeWX and dependencies
