@@ -2,7 +2,7 @@ VERSION:=$(shell cat VERSION)
 
 .PHONY: build
 build:
-	docker-compose build --force-rm
+	docker compose build --force-rm --no-cache
 	docker build --tag makobdk/weewx5:$(VERSION) --tag makobdk/weewx5:latest .
 
 .PHONY: push

@@ -11,9 +11,9 @@ docker pull makobdk/weewx5:latest
 
 ## Running the image
 
-Please run this via docker-compose, i.e.
+Please run this via docker compose, i.e.
 ```
-docker-compose up
+docker compose up
 ```
 Do have a look at the `docker-compose.yml` file to see what volumes
 are mapped in (there are quite a lot of them).
